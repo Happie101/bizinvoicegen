@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://bizinvoicegen.com/sitemap.xml
