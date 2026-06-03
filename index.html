@@ -851,4 +851,66 @@ const LS = {
 };
 function saveLocal(){
   localStorage.setItem(LS.CO,JSON.stringify({
-    fromNam
+    e:v('fromName'),fromAddr:v('fromAddr'),fromEmail:v('fromEmail'),
+    fromPhone:v('fromPhone'),fromWeb:v('fromWeb'),fromVat:v('fromVat'),
+    accent,logo,template,_v:LS.VERSION
+  }));
+}
+function loadLocal(){
+  try{
+    const d=JSON.parse(localStorage.getItem(LS.CO)||'{}');
+    sv('fromName',d.fromName);sv('fromAddr',d.fromAddr);sv('fromEmail',d.fromEmail);
+    sv('fromPhone',d.fromPhone);sv('fromWeb',d.fromWeb);sv('fromVat',d.fromVat);
+    if(d.accent) setColor(d.accent);
+    if(d.logo){logo=d.logo;showLogo();}
+    if(d.template) setTemplate(d.template,$('tpl-'+d.template));
+  }catch(e){}
+}
+function saveHistory(){
+  try{
+    const key=LS.HIST;
+    const h=JSON.parse(localStorage.getItem(key)||'[]');
+    const num=v('invNum')||'Draft';
+    const entry={id:Date.now(),num,client:v('toName')||'No client',
+      amt:$('grandDisp')?.textContent||'$0.00',date:v('issueDate'),
+      state:{docType:v('docType'),currency:v('currency'),lang:v('lang'),invNum:v('invNum'),
+        poNum:v('poNum'),payTerms:v('payTerms'),issueDate:v('issueDate'),dueDate:v('dueDate'),
+        fromName:v('fromName'),fromAddr:v('fromAddr'),fromEmail:v('fromEmail'),fromPhone:v('fromPhone'),fromWeb:v('fromWeb'),fromVat:v('fromVat'),
+        toName:v('toName'),toContact:v('toContact'),toAddr:v('toAddr'),toEmail:v('toEmail'),toPhone:v('toPhone'),toRef:v('toRef'),
+        disc:v('disc'),tax:v('tax'),ship:v('ship'),paid:v('paid'),
+        notes:v('notes'),terms:v('terms'),lis:[...lis],accent,logo,template,font:v('fontFam')}};
+    const idx=h.findIndex(x=>x.num===num);
+    if(idx>=0) h[idx]=entry; else h.unshift(entry);
+    localStorage.setItem(key,JSON.stringify(h.slice(0,25)));
+  }catch(e){}
+}
+function openHistory(){
+  $('histOverlay').classList.remove('off');
+  const h=JSON.parse(localStorage.getItem(LS.HIST)||'[]');
+  $('histList').innerHTML=h.length?h.map(x=>
+    '<div class="hist-item" onclick="loadHist('+x.id+')"><h4>'+esc(x.num)+' — '+esc(x.client)+'</h4><p>'+esc(x.amt)+' · '+(x.date||'No date')+'</p></div>'
+  ).join(''):'<div class="empty-hist">No saved invoices yet.<br>Create one to see it here.</div>';
+}
+function closeHistory(){$('histOverlay').classList.add('off')}
+function loadHist(id){
+  const h=JSON.parse(localStorage.getItem(LS.HIST)||'[]');
+  const item=h.find(x=>x.id===id);if(!item)return;
+  const s=item.state;
+  sv('docType',s.docType);sv('currency',s.currency);sv('lang',s.lang);
+  sv('invNum',s.invNum);sv('poNum',s.poNum);sv('payTerms',s.payTerms);
+  sv('issueDate',s.issueDate);sv('dueDate',s.dueDate);
+  sv('fromName',s.fromName);sv('fromAddr',s.fromAddr);sv('fromEmail',s.fromEmail);
+  sv('fromPhone',s.fromPhone);sv('fromWeb',s.fromWeb);sv('fromVat',s.fromVat);
+  sv('toName',s.toName);sv('toContact',s.toContact);sv('toAddr',s.toAddr);
+  sv('toEmail',s.toEmail);sv('toPhone',s.toPhone);sv('toRef',s.toRef);
+  sv('disc',s.disc);sv('tax',s.tax);sv('ship',s.ship);sv('paid',s.paid);
+  sv('notes',s.notes);sv('terms',s.terms);sv('fontFam',s.font);
+  lis=s.lis||[];
+  if(s.accent) setColor(s.accent);
+  if(s.logo){logo=s.logo;showLogo();}else{clearLogo();}
+  if(s.template) setTemplate(s.template,$('tpl-'+s.template));
+  renderLIs();ui();closeHistory();
+}
+</script>
+</body>
+</html>
